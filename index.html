@@ -1,0 +1,1250 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Analisis Data Kelas 3 SD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    * {
+      font-family: 'Nunito', sans-serif;
+    }
+    .drag-item {
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .drag-item:active {
+      cursor: grabbing;
+    }
+    .drop-zone {
+      min-height: 50px;
+      border: 3px dashed #cbd5e1;
+      transition: all 0.3s ease;
+    }
+    .drop-zone.drag-over {
+      border-color: #f59e0b;
+      background-color: #fef3c7;
+      transform: scale(1.02);
+    }
+    .drop-zone.filled {
+      border-style: solid;
+      border-color: #10b981;
+      background-color: #d1fae5;
+    }
+    .bounce {
+      animation: bounce 0.5s ease;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .shake {
+      animation: shake 0.5s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    .star-burst {
+      animation: starBurst 0.6s ease;
+    }
+    @keyframes starBurst {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg); opacity: 1; }
+    }
+    .progress-fill {
+      transition: width 0.5s ease;
+    }
+    .fade-in {
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pictograph-item {
+      transition: all 0.2s ease;
+    }
+    .pictograph-item:hover {
+      transform: scale(1.1);
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gradient-to-br from-purple-400 via-pink-400 to-orange-300 overflow-auto">
+  <div id="app" class="w-full min-h-full p-4"><!-- Welcome Screen -->
+   <div id="welcome-screen" class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-8 fade-in">
+    <div class="text-center mb-8">
+     <div class="text-6xl mb-4">
+      📊📈🎯
+     </div>
+     <h1 id="main-title" class="text-3xl font-extrabold text-purple-600 mb-2">Kuis Analisis Data</h1>
+     <p id="welcome-text" class="text-lg text-gray-600">Ayo belajar tentang data dengan cara yang seru!</p>
+     <div class="mt-4 flex justify-center gap-2"><span class="text-2xl">🌟</span> <span class="text-2xl">🏆</span> <span class="text-2xl">🎉</span>
+     </div>
+    </div>
+    <div class="space-y-6">
+     <div><label class="block text-lg font-bold text-gray-700 mb-2">📝 Nama Lengkap</label> <input type="text" id="student-name" placeholder="Tulis namamu di sini..." class="w-full px-4 py-3 text-lg border-3 border-purple-300 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-200">
+     </div>
+     <div><label class="block text-lg font-bold text-gray-700 mb-2">🏫 Pilih Kelasmu</label>
+      <div class="grid grid-cols-3 gap-4"><button type="button" class="class-btn px-6 py-4 text-xl font-bold rounded-xl border-3 border-blue-300 bg-blue-50 hover:bg-blue-100 hover:border-blue-500 transition-all" data-class="3A"> 3A 🔵 </button> <button type="button" class="class-btn px-6 py-4 text-xl font-bold rounded-xl border-3 border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 transition-all" data-class="3B"> 3B 🟢 </button> <button type="button" class="class-btn px-6 py-4 text-xl font-bold rounded-xl border-3 border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-500 transition-all" data-class="3C"> 3C 🟠 </button>
+      </div>
+      <p id="selected-class" class="mt-2 text-center text-gray-500">Belum memilih kelas</p>
+     </div><button type="button" id="start-btn" class="w-full py-4 text-xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled> 🚀 Mulai Kuis! </button>
+    </div>
+   </div><!-- Quiz Screen -->
+   <div id="quiz-screen" class="max-w-3xl mx-auto hidden"><!-- Header -->
+    <div class="bg-white rounded-2xl shadow-lg p-4 mb-4 fade-in">
+     <div class="flex justify-between items-center mb-3">
+      <div class="flex items-center gap-2"><span class="text-2xl">👤</span> <span id="display-name" class="font-bold text-purple-600"></span> <span id="display-class" class="px-2 py-1 bg-purple-100 rounded-full text-sm font-bold text-purple-600"></span>
+      </div>
+      <div class="flex items-center gap-2 bg-yellow-100 px-4 py-2 rounded-full"><span class="text-2xl">⭐</span> <span id="score" class="text-xl font-extrabold text-yellow-600">0</span> <span class="text-gray-500">poin</span>
+      </div>
+     </div>
+     <div class="flex items-center gap-3"><span class="text-sm font-bold text-gray-500">Soal <span id="current-q">1</span>/25</span>
+      <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+       <div id="progress-bar" class="progress-fill h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full" style="width: 4%"></div>
+      </div>
+     </div>
+    </div><!-- Question Card -->
+    <div id="question-card" class="bg-white rounded-3xl shadow-2xl p-6 fade-in"><!-- Question content will be inserted here -->
+    </div><!-- Feedback -->
+    <div id="feedback" class="hidden mt-4 p-4 rounded-2xl text-center font-bold text-lg fade-in"></div><!-- Next Button --> <button type="button" id="next-btn" class="hidden w-full mt-4 py-4 text-xl font-bold text-white bg-gradient-to-r from-green-500 to-teal-500 rounded-xl hover:from-green-600 hover:to-teal-600 transform hover:scale-105 transition-all shadow-lg"> Lanjut ke Soal Berikutnya ➡️ </button>
+   </div><!-- Result Screen -->
+   <div id="result-screen" class="max-w-2xl mx-auto hidden">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 text-center fade-in">
+     <div id="result-emoji" class="text-8xl mb-4"></div>
+     <h2 id="result-title" class="text-3xl font-extrabold mb-2"></h2>
+     <p id="result-name" class="text-xl text-gray-600 mb-6"></p>
+     <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-4">
+       <div class="text-4xl mb-2">
+        ⭐
+       </div>
+       <div class="text-3xl font-extrabold text-yellow-600" id="final-score">
+        0
+       </div>
+       <div class="text-gray-500">
+        Total Poin
+       </div>
+      </div>
+      <div class="bg-gradient-to-br from-green-100 to-teal-100 rounded-2xl p-4">
+       <div class="text-4xl mb-2">
+        ✅
+       </div>
+       <div class="text-3xl font-extrabold text-green-600" id="correct-count">
+        0
+       </div>
+       <div class="text-gray-500">
+        Jawaban Benar
+       </div>
+      </div>
+     </div>
+     <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-4 mb-6">
+      <div class="text-4xl mb-2">
+       📊
+      </div>
+      <div class="text-2xl font-extrabold text-red-500" id="wrong-attempts">
+       0
+      </div>
+      <div class="text-gray-500">
+       Total Kesalahan Menjawab
+      </div>
+      <p class="text-sm text-gray-400 mt-1">(Setiap kesalahan mengurangi 5 poin)</p>
+     </div>
+     <div id="achievements" class="flex justify-center gap-4 mb-6"><!-- Achievements will be inserted here -->
+     </div><button type="button" id="restart-btn" class="w-full py-4 text-xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all shadow-lg"> 🔄 Main Lagi! </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Configuration
+    const defaultConfig = {
+      quiz_title: "Kuis Analisis Data",
+      welcome_message: "Ayo belajar tentang data dengan cara yang seru!"
+    };
+
+    let config = { ...defaultConfig };
+
+    // State
+    let studentName = "";
+    let studentClass = "";
+    let currentQuestion = 0;
+    let score = 0;
+    let wrongAttempts = 0;
+    let currentQuestionWrong = 0;
+    let answeredCorrectly = false;
+    let draggedItem = null;
+
+    // Praise messages
+    const praiseMessages = [
+      "🌟 Hebat sekali! Kamu pintar!",
+      "🎉 Waaah, benar! Keren!",
+      "⭐ Luar biasa! Jawaban tepat!",
+      "🏆 Mantap! Kamu juara!",
+      "👏 Bagus banget! Terus semangat!",
+      "🌈 Sempurna! Kamu memang pintar!",
+      "🎯 Tepat sasaran! Excellent!",
+      "💪 Super! Kamu bisa!",
+      "🦸 Kamu seperti pahlawan data!",
+      "✨ Cemerlang! Jawaban benar!"
+    ];
+
+    const supportMessages = [
+      "😊 Belum tepat, coba lagi ya!",
+      "💪 Semangat! Kamu pasti bisa!",
+      "🤔 Hmm, coba pikirkan lagi!",
+      "🌟 Jangan menyerah, coba lagi!",
+      "📚 Baca soalnya sekali lagi ya!",
+      "🎯 Hampir! Coba sekali lagi!",
+      "💡 Coba perhatikan datanya baik-baik!",
+      "🌈 Tidak apa-apa, coba lagi!"
+    ];
+
+    // Questions data
+    const questions = [
+      {
+        type: "multiple",
+        question: "Apa yang dimaksud dengan DATA?",
+        options: [
+          "Kumpulan informasi atau keterangan",
+          "Nama buah-buahan",
+          "Jenis permainan",
+          "Nama hewan"
+        ],
+        correct: 0,
+        emoji: "📊"
+      },
+      {
+        type: "multiple",
+        question: "Manakah yang BUKAN cara mengumpulkan data?",
+        options: [
+          "Bertanya kepada teman",
+          "Menghitung benda",
+          "Bermain game",
+          "Mencatat hasil pengamatan"
+        ],
+        correct: 2,
+        emoji: "🔍"
+      },
+      {
+        type: "pictograph-read",
+        question: "Berdasarkan diagram gambar di bawah, berapa jumlah buah APEL?",
+        data: { "🍎": 4 },
+        legend: "🍎 = 1 buah apel",
+        answer: 4,
+        emoji: "🍎"
+      },
+      {
+        type: "multiple",
+        question: "Diagram gambar disebut juga dengan...",
+        options: [
+          "Pictograph / Piktograf",
+          "Fotografi",
+          "Kaligrafi",
+          "Geografi"
+        ],
+        correct: 0,
+        emoji: "📈"
+      },
+      {
+        type: "drag-drop",
+        question: "Pasangkan jenis data dengan contohnya!",
+        pairs: [
+          { item: "Warna favorit", target: "Data Kualitatif" },
+          { item: "Jumlah siswa", target: "Data Kuantitatif" },
+          { item: "Hobby", target: "Data Kualitatif" },
+          { item: "Tinggi badan", target: "Data Kuantitatif" }
+        ],
+        emoji: "🎯"
+      },
+      {
+        type: "pictograph-read",
+        question: "Diagram menunjukkan jumlah buku yang dibaca siswa. Berapa total buku yang dibaca?",
+        data: { "📚": 5 },
+        legend: "📚 = 2 buku",
+        answer: 10,
+        multiply: true,
+        emoji: "📚"
+      },
+      {
+        type: "fill-blank",
+        question: "Tabel di bawah menunjukkan buah kesukaan siswa. Lengkapi jumlah yang kosong!",
+        tableData: [
+          { fruit: "🍎 Apel", count: 5 },
+          { fruit: "🍌 Pisang", count: "?" },
+          { fruit: "🍊 Jeruk", count: 3 }
+        ],
+        hint: "Total siswa = 15 orang",
+        answer: 7,
+        emoji: "🍌"
+      },
+      {
+        type: "multiple",
+        question: "Di kelas ada 10 siswa suka kucing, 8 siswa suka kelinci, dan 7 siswa suka ikan. Hewan apa yang paling banyak disuka?",
+        options: [
+          "Kucing 🐱",
+          "Kelinci 🐰",
+          "Ikan 🐟",
+          "Semua sama"
+        ],
+        correct: 0,
+        emoji: "🐱"
+      },
+      {
+        type: "pictograph-create",
+        question: "Buat diagram gambar! Ada 3 buah jeruk. Klik untuk menambahkan!",
+        symbol: "🍊",
+        target: 3,
+        emoji: "🍊"
+      },
+      {
+        type: "multiple",
+        question: "Mengapa kita perlu menyajikan data dalam bentuk diagram?",
+        options: [
+          "Agar lebih mudah dibaca dan dipahami",
+          "Agar lebih sulit dibaca",
+          "Agar bisa diwarnai",
+          "Agar bisa dimainkan"
+        ],
+        correct: 0,
+        emoji: "💡"
+      },
+      {
+        type: "drag-drop-order",
+        question: "Urutkan langkah mengumpulkan data dari pertama sampai terakhir!",
+        items: [
+          "Tentukan topik data",
+          "Kumpulkan informasi",
+          "Catat hasilnya",
+          "Buat diagram"
+        ],
+        emoji: "📝"
+      },
+      {
+        type: "pictograph-read",
+        question: "Diagram menunjukkan jumlah es krim yang terjual. Hari apa yang paling banyak terjual?",
+        multiData: {
+          "Senin": { symbol: "🍦", count: 3 },
+          "Selasa": { symbol: "🍦", count: 5 },
+          "Rabu": { symbol: "🍦", count: 2 }
+        },
+        answerType: "select",
+        answer: "Selasa",
+        options: ["Senin", "Selasa", "Rabu"],
+        emoji: "🍦"
+      },
+      {
+        type: "multiple",
+        question: "Ani mencatat hewan peliharaan teman-temannya. Ini adalah kegiatan...",
+        options: [
+          "Mengumpulkan data",
+          "Membaca data",
+          "Menghapus data",
+          "Menyembunyikan data"
+        ],
+        correct: 0,
+        emoji: "📋"
+      },
+      {
+        type: "fill-blank",
+        question: "Diagram gambar menunjukkan 🌸🌸🌸🌸🌸🌸 (setiap 🌸 = 2 bunga). Berapa total bunga sebenarnya?",
+        answer: 12,
+        emoji: "🌸"
+      },
+      {
+        type: "pictograph-create",
+        question: "Buat diagram untuk 5 bintang! Klik untuk menambahkan!",
+        symbol: "⭐",
+        target: 5,
+        emoji: "⭐"
+      },
+      {
+        type: "multiple",
+        question: "Data berikut yang bisa dikumpulkan dari lingkungan sekolah adalah...",
+        options: [
+          "Jumlah meja di kelas",
+          "Jumlah planet di tata surya",
+          "Nama presiden",
+          "Rumus matematika"
+        ],
+        correct: 0,
+        emoji: "🏫"
+      },
+      {
+        type: "drag-drop",
+        question: "Kelompokkan cara mendapatkan data ini!",
+        pairs: [
+          { item: "Bertanya pada teman", target: "Wawancara" },
+          { item: "Menghitung buku", target: "Pencacahan" },
+          { item: "Melihat dan mencatat", target: "Pengamatan" },
+          { item: "Mengisi formulir", target: "Angket" }
+        ],
+        emoji: "📊"
+      },
+      {
+        type: "pictograph-read",
+        question: "Diagram buah kesukaan: 🍎🍎🍎 (apel), 🍌🍌🍌🍌🍌 (pisang), 🍇🍇 (anggur). Buah apa yang paling sedikit disuka?",
+        answerType: "select",
+        answer: "Anggur",
+        options: ["Apel", "Pisang", "Anggur"],
+        emoji: "🍇"
+      },
+      {
+        type: "fill-blank",
+        question: "Di kelas 3A ada 12 siswa laki-laki dan beberapa siswa perempuan. Total siswa 28 orang. Berapa siswa perempuan?",
+        answer: 16,
+        emoji: "👧"
+      },
+      {
+        type: "multiple",
+        question: "Tanda tally IIII I menunjukkan angka...",
+        options: [
+          "6",
+          "5",
+          "4",
+          "7"
+        ],
+        correct: 0,
+        emoji: "📍"
+      },
+      {
+        type: "pictograph-create",
+        question: "Buat diagram untuk 4 hati! Klik untuk menambahkan!",
+        symbol: "❤️",
+        target: 4,
+        emoji: "❤️"
+      },
+      {
+        type: "multiple",
+        question: "Mana yang merupakan data kuantitatif (berupa angka)?",
+        options: [
+          "Jumlah siswa: 25 orang",
+          "Warna favorit: biru",
+          "Makanan kesukaan: nasi goreng",
+          "Nama hewan: kucing"
+        ],
+        correct: 0,
+        emoji: "🔢"
+      },
+      {
+        type: "drag-drop-order",
+        question: "Urutkan dari yang terkecil ke terbesar: 15, 8, 23, 12",
+        items: ["8", "12", "15", "23"],
+        emoji: "📊"
+      },
+      {
+        type: "fill-blank",
+        question: "Diagram: 🚗🚗🚗🚗🚗🚗🚗 menunjukkan jumlah mobil. Jika 🚗 = 3 mobil, berapa total mobil?",
+        answer: 21,
+        emoji: "🚗"
+      },
+      {
+        type: "multiple",
+        question: "Selamat! Pertanyaan terakhir: Apa manfaat belajar analisis data?",
+        options: [
+          "Semua jawaban benar",
+          "Membantu membuat keputusan",
+          "Memudahkan memahami informasi",
+          "Bisa membandingkan data"
+        ],
+        correct: 0,
+        emoji: "🎓"
+      }
+    ];
+
+    // Helper functions
+    function getRandomPraise() {
+      return praiseMessages[Math.floor(Math.random() * praiseMessages.length)];
+    }
+
+    function getRandomSupport() {
+      return supportMessages[Math.floor(Math.random() * supportMessages.length)];
+    }
+
+    function showFeedback(isCorrect, message) {
+      const feedback = document.getElementById("feedback");
+      feedback.className = `mt-4 p-4 rounded-2xl text-center font-bold text-lg fade-in ${isCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`;
+      feedback.textContent = message;
+      feedback.classList.remove("hidden");
+      
+      const card = document.getElementById("question-card");
+      card.classList.add(isCorrect ? "bounce" : "shake");
+      setTimeout(() => card.classList.remove("bounce", "shake"), 500);
+    }
+
+    function updateScore(points) {
+      score += points;
+      if (score < 0) score = 0;
+      document.getElementById("score").textContent = score;
+      document.getElementById("score").classList.add("bounce");
+      setTimeout(() => document.getElementById("score").classList.remove("bounce"), 500);
+    }
+
+    function updateProgress() {
+      document.getElementById("current-q").textContent = currentQuestion + 1;
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = `${progress}%`;
+    }
+
+    function handleCorrectAnswer() {
+      answeredCorrectly = true;
+      if (currentQuestionWrong === 0) {
+        updateScore(10);
+      }
+      showFeedback(true, getRandomPraise());
+      document.getElementById("next-btn").classList.remove("hidden");
+    }
+
+    function handleWrongAnswer() {
+      wrongAttempts++;
+      currentQuestionWrong++;
+      if (currentQuestionWrong > 1) {
+        updateScore(-5);
+      }
+      showFeedback(false, getRandomSupport() + " (-5 poin)");
+    }
+
+    // Render functions
+    function renderMultipleChoice(q) {
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+        <div class="grid gap-3">
+      `;
+      
+      q.options.forEach((opt, i) => {
+        html += `
+          <button type="button" class="option-btn w-full p-4 text-left text-lg font-semibold rounded-xl border-3 border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-400 transition-all" data-index="${i}">
+            <span class="inline-block w-8 h-8 text-center bg-purple-100 rounded-full mr-3 text-purple-600">${String.fromCharCode(65 + i)}</span>
+            ${opt}
+          </button>
+        `;
+      });
+      
+      html += "</div>";
+      document.getElementById("question-card").innerHTML = html;
+      
+      document.querySelectorAll(".option-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (answeredCorrectly) return;
+          
+          const selected = parseInt(btn.dataset.index);
+          if (selected === q.correct) {
+            btn.classList.add("bg-green-100", "border-green-500");
+            handleCorrectAnswer();
+          } else {
+            btn.classList.add("bg-red-100", "border-red-500");
+            handleWrongAnswer();
+          }
+        });
+      });
+    }
+
+    function renderPictographRead(q) {
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+      `;
+      
+      if (q.data) {
+        html += `<div class="text-center mb-4 p-4 bg-yellow-50 rounded-xl">`;
+        for (const [symbol, count] of Object.entries(q.data)) {
+          html += `<div class="text-4xl mb-2">${symbol.repeat(count)}</div>`;
+        }
+        if (q.legend) {
+          html += `<p class="text-sm text-gray-500 mt-2">${q.legend}</p>`;
+        }
+        html += `</div>`;
+      }
+      
+      if (q.multiData) {
+        html += `<div class="space-y-3 mb-4">`;
+        for (const [day, info] of Object.entries(q.multiData)) {
+          html += `
+            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+              <span class="font-bold w-20">${day}</span>
+              <span class="text-2xl">${info.symbol.repeat(info.count)}</span>
+            </div>
+          `;
+        }
+        html += `</div>`;
+      }
+      
+      if (q.answerType === "select") {
+        html += `<div class="grid grid-cols-3 gap-3">`;
+        q.options.forEach(opt => {
+          html += `
+            <button type="button" class="select-btn p-4 text-lg font-bold rounded-xl border-3 border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-400 transition-all" data-value="${opt}">
+              ${opt}
+            </button>
+          `;
+        });
+        html += `</div>`;
+      } else {
+        html += `
+          <div class="flex justify-center items-center gap-3">
+            <span class="text-lg font-bold">Jawaban:</span>
+            <input type="number" id="answer-input" class="w-24 px-4 py-3 text-xl text-center font-bold border-3 border-purple-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="?">
+            <button type="button" id="submit-answer" class="px-6 py-3 text-lg font-bold text-white bg-purple-500 rounded-xl hover:bg-purple-600 transition-all">
+              Cek! ✓
+            </button>
+          </div>
+        `;
+      }
+      
+      document.getElementById("question-card").innerHTML = html;
+      
+      if (q.answerType === "select") {
+        document.querySelectorAll(".select-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            if (answeredCorrectly) return;
+            
+            if (btn.dataset.value === q.answer) {
+              btn.classList.add("bg-green-100", "border-green-500");
+              handleCorrectAnswer();
+            } else {
+              btn.classList.add("bg-red-100", "border-red-500");
+              handleWrongAnswer();
+            }
+          });
+        });
+      } else {
+        document.getElementById("submit-answer").addEventListener("click", () => {
+          if (answeredCorrectly) return;
+          
+          const input = document.getElementById("answer-input");
+          const userAnswer = parseInt(input.value);
+          
+          if (userAnswer === q.answer) {
+            input.classList.add("bg-green-100", "border-green-500");
+            handleCorrectAnswer();
+          } else {
+            input.classList.add("bg-red-100", "border-red-500");
+            handleWrongAnswer();
+            setTimeout(() => {
+              input.classList.remove("bg-red-100", "border-red-500");
+              input.value = "";
+            }, 1000);
+          }
+        });
+      }
+    }
+
+    function renderFillBlank(q) {
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+      `;
+      
+      if (q.tableData) {
+        html += `
+          <div class="mb-6 overflow-hidden rounded-xl border-2 border-gray-200">
+            <table class="w-full">
+              <thead class="bg-purple-100">
+                <tr>
+                  <th class="p-3 text-left font-bold">Buah</th>
+                  <th class="p-3 text-center font-bold">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        q.tableData.forEach(row => {
+          html += `
+            <tr class="border-t border-gray-200">
+              <td class="p-3 text-lg">${row.fruit}</td>
+              <td class="p-3 text-center text-lg font-bold">${row.count === "?" ? '<span class="text-purple-500">?</span>' : row.count}</td>
+            </tr>
+          `;
+        });
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
+        if (q.hint) {
+          html += `<p class="text-center text-gray-500 mb-4">💡 ${q.hint}</p>`;
+        }
+      }
+      
+      html += `
+        <div class="flex justify-center items-center gap-3">
+          <span class="text-lg font-bold">Jawaban:</span>
+          <input type="number" id="answer-input" class="w-24 px-4 py-3 text-xl text-center font-bold border-3 border-purple-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="?">
+          <button type="button" id="submit-answer" class="px-6 py-3 text-lg font-bold text-white bg-purple-500 rounded-xl hover:bg-purple-600 transition-all">
+            Cek! ✓
+          </button>
+        </div>
+      `;
+      
+      document.getElementById("question-card").innerHTML = html;
+      
+      document.getElementById("submit-answer").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        
+        const input = document.getElementById("answer-input");
+        const userAnswer = parseInt(input.value);
+        
+        if (userAnswer === q.answer) {
+          input.classList.add("bg-green-100", "border-green-500");
+          handleCorrectAnswer();
+        } else {
+          input.classList.add("bg-red-100", "border-red-500");
+          handleWrongAnswer();
+          setTimeout(() => {
+            input.classList.remove("bg-red-100", "border-red-500");
+            input.value = "";
+          }, 1000);
+        }
+      });
+    }
+
+    function renderPictographCreate(q) {
+      let currentCount = 0;
+      
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+        <div class="text-center mb-6">
+          <div id="pictograph-display" class="min-h-20 p-4 bg-yellow-50 rounded-xl text-5xl flex flex-wrap justify-center gap-2">
+            <span class="text-gray-300 text-lg">Klik tombol untuk menambah!</span>
+          </div>
+          <p class="mt-2 text-gray-500">Jumlah: <span id="pict-count" class="font-bold text-purple-600">0</span> / ${q.target}</p>
+        </div>
+        <div class="flex justify-center gap-3">
+          <button type="button" id="add-symbol" class="px-8 py-4 text-2xl font-bold text-white bg-green-500 rounded-xl hover:bg-green-600 transition-all">
+            + Tambah ${q.symbol}
+          </button>
+          <button type="button" id="remove-symbol" class="px-8 py-4 text-2xl font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">
+            - Kurangi
+          </button>
+        </div>
+        <button type="button" id="check-pictograph" class="w-full mt-4 py-3 text-lg font-bold text-white bg-purple-500 rounded-xl hover:bg-purple-600 transition-all">
+          Cek Jawaban! ✓
+        </button>
+      `;
+      
+      document.getElementById("question-card").innerHTML = html;
+      
+      const display = document.getElementById("pictograph-display");
+      const countSpan = document.getElementById("pict-count");
+      
+      function updateDisplay() {
+        if (currentCount === 0) {
+          display.innerHTML = '<span class="text-gray-300 text-lg">Klik tombol untuk menambah!</span>';
+        } else {
+          display.innerHTML = Array(currentCount).fill(`<span class="pictograph-item star-burst">${q.symbol}</span>`).join("");
+        }
+        countSpan.textContent = currentCount;
+      }
+      
+      document.getElementById("add-symbol").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        if (currentCount < 10) {
+          currentCount++;
+          updateDisplay();
+        }
+      });
+      
+      document.getElementById("remove-symbol").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        if (currentCount > 0) {
+          currentCount--;
+          updateDisplay();
+        }
+      });
+      
+      document.getElementById("check-pictograph").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        
+        if (currentCount === q.target) {
+          display.classList.add("bg-green-100");
+          handleCorrectAnswer();
+        } else {
+          display.classList.add("bg-red-100");
+          handleWrongAnswer();
+          setTimeout(() => display.classList.remove("bg-red-100"), 1000);
+        }
+      });
+    }
+
+    function renderDragDrop(q) {
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+      `;
+      
+      const shuffledItems = [...q.pairs].sort(() => Math.random() - 0.5);
+      const targets = [...new Set(q.pairs.map(p => p.target))];
+      
+      html += `
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-bold text-gray-600 mb-3 text-center">📦 Seret ini:</h4>
+            <div id="drag-container" class="space-y-2">
+      `;
+      
+      shuffledItems.forEach((pair, i) => {
+        html += `
+          <div class="drag-item p-3 bg-purple-100 rounded-xl text-center font-bold text-purple-700 border-2 border-purple-300" draggable="true" data-item="${pair.item}" data-target="${pair.target}">
+            ${pair.item}
+          </div>
+        `;
+      });
+      
+      html += `
+            </div>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-600 mb-3 text-center">🎯 Letakkan di sini:</h4>
+            <div class="space-y-2">
+      `;
+      
+      targets.forEach(target => {
+        html += `
+          <div class="drop-zone p-3 rounded-xl text-center font-bold text-gray-500" data-target="${target}">
+            ${target}
+            <div class="dropped-items mt-2 space-y-1"></div>
+          </div>
+        `;
+      });
+      
+      html += `
+            </div>
+          </div>
+        </div>
+        <button type="button" id="check-dragdrop" class="w-full mt-4 py-3 text-lg font-bold text-white bg-purple-500 rounded-xl hover:bg-purple-600 transition-all">
+          Cek Jawaban! ✓
+        </button>
+      `;
+      
+      document.getElementById("question-card").innerHTML = html;
+      
+      // Drag and drop functionality
+      const dragItems = document.querySelectorAll(".drag-item");
+      const dropZones = document.querySelectorAll(".drop-zone");
+      
+      dragItems.forEach(item => {
+        item.addEventListener("dragstart", (e) => {
+          draggedItem = item;
+          item.style.opacity = "0.5";
+        });
+        
+        item.addEventListener("dragend", () => {
+          item.style.opacity = "1";
+        });
+        
+        // Touch support
+        item.addEventListener("touchstart", (e) => {
+          draggedItem = item;
+          item.style.opacity = "0.5";
+        });
+        
+        item.addEventListener("touchend", (e) => {
+          item.style.opacity = "1";
+          const touch = e.changedTouches[0];
+          const element = document.elementFromPoint(touch.clientX, touch.clientY);
+          const dropZone = element?.closest(".drop-zone");
+          if (dropZone && draggedItem) {
+            handleDrop(dropZone, draggedItem);
+          }
+          draggedItem = null;
+        });
+      });
+      
+      dropZones.forEach(zone => {
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("drag-over");
+        });
+        
+        zone.addEventListener("dragleave", () => {
+          zone.classList.remove("drag-over");
+        });
+        
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("drag-over");
+          if (draggedItem) {
+            handleDrop(zone, draggedItem);
+          }
+        });
+      });
+      
+      function handleDrop(zone, item) {
+        const droppedContainer = zone.querySelector(".dropped-items");
+        const clone = item.cloneNode(true);
+        clone.classList.remove("drag-item");
+        clone.classList.add("bg-blue-100", "border-blue-300", "text-blue-700");
+        clone.draggable = false;
+        
+        // Add remove functionality
+        clone.style.cursor = "pointer";
+        clone.addEventListener("click", () => {
+          clone.remove();
+          item.style.display = "block";
+          if (droppedContainer.children.length === 0) {
+            zone.classList.remove("filled");
+          }
+        });
+        
+        droppedContainer.appendChild(clone);
+        item.style.display = "none";
+        zone.classList.add("filled");
+      }
+      
+      document.getElementById("check-dragdrop").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        
+        let correct = true;
+        dropZones.forEach(zone => {
+          const targetName = zone.dataset.target;
+          const droppedItems = zone.querySelectorAll(".dropped-items > div");
+          droppedItems.forEach(item => {
+            if (item.dataset.target !== targetName) {
+              correct = false;
+            }
+          });
+        });
+        
+        // Check if all items are placed
+        const remainingItems = document.querySelectorAll("#drag-container .drag-item");
+        let allPlaced = true;
+        remainingItems.forEach(item => {
+          if (item.style.display !== "none") {
+            allPlaced = false;
+          }
+        });
+        
+        if (correct && allPlaced) {
+          dropZones.forEach(zone => zone.classList.add("bg-green-100"));
+          handleCorrectAnswer();
+        } else {
+          dropZones.forEach(zone => zone.classList.add("bg-red-100"));
+          handleWrongAnswer();
+          setTimeout(() => {
+            dropZones.forEach(zone => zone.classList.remove("bg-red-100"));
+          }, 1000);
+        }
+      });
+    }
+
+    function renderDragDropOrder(q) {
+      let html = `
+        <div class="text-center mb-6">
+          <span class="text-5xl">${q.emoji}</span>
+          <h3 class="text-xl font-bold text-gray-800 mt-4">${q.question}</h3>
+        </div>
+        <p class="text-center text-gray-500 mb-4">💡 Klik item untuk memindahkan ke urutan yang benar!</p>
+      `;
+      
+      const shuffled = [...q.items].sort(() => Math.random() - 0.5);
+      
+      html += `
+        <div class="mb-4">
+          <h4 class="font-bold text-gray-600 mb-2">📦 Pilih dari sini:</h4>
+          <div id="source-items" class="flex flex-wrap gap-2">
+      `;
+      
+      shuffled.forEach((item, i) => {
+        html += `
+          <button type="button" class="source-item px-4 py-2 bg-purple-100 rounded-xl font-bold text-purple-700 border-2 border-purple-300 hover:bg-purple-200 transition-all" data-value="${item}">
+            ${item}
+          </button>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+        <div class="mb-4">
+          <h4 class="font-bold text-gray-600 mb-2">🎯 Urutan jawabanmu:</h4>
+          <div id="answer-slots" class="grid grid-cols-4 gap-2">
+      `;
+      
+      for (let i = 0; i < q.items.length; i++) {
+        html += `
+          <div class="answer-slot min-h-12 p-2 border-3 border-dashed border-gray-300 rounded-xl flex items-center justify-center text-gray-400 font-bold" data-index="${i}">
+            ${i + 1}
+          </div>
+        `;
+      }
+      
+      html += `
+          </div>
+        </div>
+        <button type="button" id="check-order" class="w-full mt-4 py-3 text-lg font-bold text-white bg-purple-500 rounded-xl hover:bg-purple-600 transition-all">
+          Cek Jawaban! ✓
+        </button>
+      `;
+      
+      document.getElementById("question-card").innerHTML = html;
+      
+      const answerSlots = document.querySelectorAll(".answer-slot");
+      let currentSlot = 0;
+      
+      document.querySelectorAll(".source-item").forEach(item => {
+        item.addEventListener("click", () => {
+          if (answeredCorrectly) return;
+          if (currentSlot >= q.items.length) return;
+          
+          const slot = answerSlots[currentSlot];
+          slot.textContent = item.dataset.value;
+          slot.dataset.value = item.dataset.value;
+          slot.classList.add("bg-blue-100", "border-blue-400", "text-blue-700");
+          slot.classList.remove("border-dashed", "text-gray-400");
+          
+          item.style.display = "none";
+          currentSlot++;
+        });
+      });
+      
+      // Click to remove from slot
+      answerSlots.forEach(slot => {
+        slot.addEventListener("click", () => {
+          if (answeredCorrectly) return;
+          if (!slot.dataset.value) return;
+          
+          const value = slot.dataset.value;
+          const sourceItem = document.querySelector(`.source-item[data-value="${value}"]`);
+          if (sourceItem) {
+            sourceItem.style.display = "inline-block";
+          }
+          
+          // Shift items
+          const index = parseInt(slot.dataset.index);
+          for (let i = index; i < q.items.length - 1; i++) {
+            const nextSlot = answerSlots[i + 1];
+            if (nextSlot.dataset.value) {
+              answerSlots[i].textContent = nextSlot.dataset.value;
+              answerSlots[i].dataset.value = nextSlot.dataset.value;
+            } else {
+              answerSlots[i].textContent = i + 1;
+              answerSlots[i].dataset.value = "";
+              answerSlots[i].classList.remove("bg-blue-100", "border-blue-400", "text-blue-700");
+              answerSlots[i].classList.add("border-dashed", "text-gray-400");
+            }
+          }
+          
+          // Clear last slot
+          const lastSlot = answerSlots[q.items.length - 1];
+          lastSlot.textContent = q.items.length;
+          lastSlot.dataset.value = "";
+          lastSlot.classList.remove("bg-blue-100", "border-blue-400", "text-blue-700");
+          lastSlot.classList.add("border-dashed", "text-gray-400");
+          
+          currentSlot = Math.max(0, currentSlot - 1);
+        });
+      });
+      
+      document.getElementById("check-order").addEventListener("click", () => {
+        if (answeredCorrectly) return;
+        
+        let correct = true;
+        answerSlots.forEach((slot, i) => {
+          if (slot.dataset.value !== q.items[i]) {
+            correct = false;
+          }
+        });
+        
+        if (correct) {
+          answerSlots.forEach(slot => slot.classList.add("bg-green-100"));
+          handleCorrectAnswer();
+        } else {
+          answerSlots.forEach(slot => slot.classList.add("bg-red-100"));
+          handleWrongAnswer();
+          setTimeout(() => {
+            answerSlots.forEach(slot => slot.classList.remove("bg-red-100"));
+          }, 1000);
+        }
+      });
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      currentQuestionWrong = 0;
+      answeredCorrectly = false;
+      
+      document.getElementById("feedback").classList.add("hidden");
+      document.getElementById("next-btn").classList.add("hidden");
+      
+      updateProgress();
+      
+      switch (q.type) {
+        case "multiple":
+          renderMultipleChoice(q);
+          break;
+        case "pictograph-read":
+          renderPictographRead(q);
+          break;
+        case "fill-blank":
+          renderFillBlank(q);
+          break;
+        case "pictograph-create":
+          renderPictographCreate(q);
+          break;
+        case "drag-drop":
+          renderDragDrop(q);
+          break;
+        case "drag-drop-order":
+          renderDragDropOrder(q);
+          break;
+        default:
+          renderMultipleChoice(q);
+      }
+      
+      document.getElementById("question-card").classList.add("fade-in");
+    }
+
+    function showResults() {
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("result-screen").classList.remove("hidden");
+      
+      const percentage = (score / 250) * 100;
+      let emoji, title;
+      
+      if (percentage >= 90) {
+        emoji = "🏆🌟🎉";
+        title = "LUAR BIASA! Kamu Juara!";
+      } else if (percentage >= 70) {
+        emoji = "⭐🎊";
+        title = "Hebat! Kamu Pintar!";
+      } else if (percentage >= 50) {
+        emoji = "👍💪";
+        title = "Bagus! Terus Belajar!";
+      } else {
+        emoji = "📚🌈";
+        title = "Semangat! Coba Lagi Ya!";
+      }
+      
+      document.getElementById("result-emoji").textContent = emoji;
+      document.getElementById("result-title").textContent = title;
+      document.getElementById("result-name").textContent = `${studentName} - Kelas ${studentClass}`;
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("correct-count").textContent = `${Math.round(score / 10)}/25`;
+      document.getElementById("wrong-attempts").textContent = wrongAttempts;
+      
+      // Achievements
+      let achievements = "";
+      if (wrongAttempts === 0) {
+        achievements += '<div class="text-4xl star-burst">🥇</div>';
+      }
+      if (score >= 200) {
+        achievements += '<div class="text-4xl star-burst">🌟</div>';
+      }
+      if (score === 250) {
+        achievements += '<div class="text-4xl star-burst">💯</div>';
+      }
+      document.getElementById("achievements").innerHTML = achievements || '<div class="text-2xl">🎯 Terus berlatih!</div>';
+    }
+
+    // Event listeners
+    document.querySelectorAll(".class-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".class-btn").forEach(b => {
+          b.classList.remove("ring-4", "ring-purple-400", "bg-purple-100");
+        });
+        btn.classList.add("ring-4", "ring-purple-400", "bg-purple-100");
+        studentClass = btn.dataset.class;
+        document.getElementById("selected-class").textContent = `Kelas ${studentClass} dipilih! ✓`;
+        document.getElementById("selected-class").classList.add("text-green-600", "font-bold");
+        checkStartButton();
+      });
+    });
+
+    document.getElementById("student-name").addEventListener("input", (e) => {
+      studentName = e.target.value.trim();
+      checkStartButton();
+    });
+
+    function checkStartButton() {
+      const startBtn = document.getElementById("start-btn");
+      if (studentName && studentClass) {
+        startBtn.disabled = false;
+      } else {
+        startBtn.disabled = true;
+      }
+    }
+
+    document.getElementById("start-btn").addEventListener("click", () => {
+      document.getElementById("welcome-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+      document.getElementById("display-name").textContent = studentName;
+      document.getElementById("display-class").textContent = `Kelas ${studentClass}`;
+      renderQuestion();
+    });
+
+    document.getElementById("next-btn").addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion >= questions.length) {
+        showResults();
+      } else {
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("restart-btn").addEventListener("click", () => {
+      currentQuestion = 0;
+      score = 0;
+      wrongAttempts = 0;
+      document.getElementById("score").textContent = "0";
+      document.getElementById("result-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+      renderQuestion();
+    });
+
+    // SDK initialization
+    async function initApp() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (newConfig) => {
+            config = { ...defaultConfig, ...newConfig };
+            document.getElementById("main-title").textContent = config.quiz_title || defaultConfig.quiz_title;
+            document.getElementById("welcome-text").textContent = config.welcome_message || defaultConfig.welcome_message;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["quiz_title", config.quiz_title || defaultConfig.quiz_title],
+            ["welcome_message", config.welcome_message || defaultConfig.welcome_message]
+          ])
+        });
+      }
+    }
+
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c12bd74534dfd03',t:'MTc2ODk1NTgxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
